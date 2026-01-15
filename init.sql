@@ -17,3 +17,8 @@ INSERT INTO users (username, email) VALUES
 ('alice', 'alice@example.com'),
 ('bob', 'bob@example.com'),
 ('charlie', 'charlie@example.com');
+
+INSERT INTO products (name, price) VALUES
+('Laptop', 1200.00),
+('Mouse', 25.00),
+('Keyboard', 50.00);

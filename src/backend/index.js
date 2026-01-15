@@ -32,6 +32,17 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
+app.post('/api/users/login', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+        if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+        res.json({ user: rows[0] });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/api/users/:id', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [req.params.id]);
