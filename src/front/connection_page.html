@@ -88,7 +88,8 @@
             <label for="username">Nom d'utilisateur</label>
             <input type="text" id="username" name="username" placeholder="ex: alice" required>
         </div>
-        <button type="submit">Se connecter</button>
+        <button type="submit" id="connect">Se connecter</button>
+        <button type="submit" id="register">Enregistrer un utilisateur</button>
         <p class="error" id="errorMsg"></p>
     </form>
     
@@ -101,9 +102,11 @@
         e.preventDefault();
         const usernameInput = document.getElementById('username').value;
         const errorMsg = document.getElementById('errorMsg');
-
+        const isRegister = e.submitter.id === 'register';
+        const endpoint = isRegister ? '/api/users/register' : '/api/users/login';
+        
         try {
-            const response = await fetch('/api/users/login', {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: usernameInput })
@@ -111,7 +114,8 @@
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem('username', data.user.username);
+                const username = (data.user && data.user.username) ? data.user.username : usernameInput;
+                localStorage.setItem('username', username);
                 window.location.href = 'index.html';
             } else {
                 errorMsg.textContent = data.message || "Erreur de connexion";

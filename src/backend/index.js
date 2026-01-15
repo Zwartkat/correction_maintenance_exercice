@@ -43,6 +43,22 @@ app.post('/api/users/login', async (req, res) => {
     }
 });
 
+app.post('/api/users/register', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const [rows_check] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+        if (rows_check.length > 0) return res.status(409).json({ message: 'User already exists' });
+
+        // Generate a dummy email since it is required by the DB schema but not provided by the form
+        const email = `${username}@example.com`;
+        const [result] = await pool.query('INSERT INTO users (username, email) VALUES (?, ?)', [username, email]);
+        
+        res.status(201).json({ user: { id: result.insertId, username, email } });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/api/users/:id', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [req.params.id]);
