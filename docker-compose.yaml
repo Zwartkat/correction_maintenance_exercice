@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  node:
+    image: node:20
+    container_name: node_app
+    working_dir: /usr/src/app
+    volumes:
+      - ./src:/usr/src/app
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: app_user
+      DB_PASSWORD: app_password
+      DB_NAME: app_database
+    networks:
+      - internal
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: app_database
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+    volumes:
+      - ./bdd:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - internal
+    # ❌ No ports exposed → only Node.js can access it
+
+networks:
+  internal:
+    driver: bridge
