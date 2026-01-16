@@ -82,6 +82,19 @@
         .buy-btn:hover { background-color: #000; }
 
         .loading { text-align: center; padding: 50px; color: #6b7280; grid-column: 1/-1; }
+
+        /* Cart Styles */
+        .cart-btn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer; font-weight: 600; display: none; align-items: center; gap: 5px; }
+        .cart-btn:hover { color: #4f46e5; }
+        
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #fff; margin: 10% auto; padding: 25px; border: 1px solid #e5e7eb; width: 90%; max-width: 500px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        .close { color: #9ca3af; float: right; font-size: 28px; font-weight: bold; line-height: 1; }
+        .close:hover { color: #111827; cursor: pointer; }
+        .cart-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-total { margin-top: 20px; text-align: right; font-size: 1.2rem; font-weight: 700; color: #111827; }
+        .remove-item { color: #ef4444; cursor: pointer; margin-left: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -91,6 +104,9 @@
         <span>&larr;</span> Retour
     </a>
     <h1>Catalogue</h1>
+    <div id="cartBtn" class="cart-btn">
+        🛒 <span id="cartCount">0</span>
+    </div>
 </header>
 
 <div class="container">
@@ -99,7 +115,91 @@
     </div>
 </div>
 
+<!-- Cart Modal -->
+<div id="cartModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 style="margin-top: 0; color: #111827;">Mon Panier</h2>
+        <div id="cartItems">Votre panier est vide.</div>
+        <div class="cart-total">Total: <span id="cartTotal">0.00</span> €</div>
+    </div>
+</div>
+
 <script>
+    // Cart Logic
+    const username = localStorage.getItem('username');
+    let cart = [];
+    const cartBtn = document.getElementById('cartBtn');
+    const cartModal = document.getElementById('cartModal');
+    const closeBtn = document.getElementsByClassName("close")[0];
+    const cartCountSpan = document.getElementById('cartCount');
+    const cartItemsDiv = document.getElementById('cartItems');
+    const cartTotalSpan = document.getElementById('cartTotal');
+
+    if (username) {
+        cartBtn.style.display = 'flex';
+        const savedCart = localStorage.getItem('cart_' + username);
+        if (savedCart) {
+            try { cart = JSON.parse(savedCart); } catch(e) { cart = []; }
+        }
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        cartCountSpan.textContent = cart.length;
+        
+        if (cart.length === 0) {
+            cartItemsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">Votre panier est vide.</p>';
+            cartTotalSpan.textContent = '0.00';
+        } else {
+            cartItemsDiv.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                total = total * parseFloat(item.price);
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <span>${item.name}</span>
+                    <span>
+                        ${item.price} €
+                        <span class="remove-item" onclick="removeFromCart(${index})">&times;</span>
+                    </span>
+                `;
+                cartItemsDiv.appendChild(div);
+            });
+            cartTotalSpan.textContent = total.toFixed(2);
+        }
+        
+        if (username) {
+            localStorage.setItem('cart_' + username, JSON.stringify(cart));
+        }
+    }
+
+    window.removeFromCart = function(index) {
+        cart.splice(index, 1);
+        updateCartUI();
+    }
+
+    function addToCart(product) {
+        if (!username) {
+            alert("Veuillez vous connecter pour accéder au panier.");
+            window.location.href = 'connection_page.html';
+            return;
+        }
+        cart.push(product);
+        updateCartUI();
+        alert(product.name + " ajouté au panier !");
+    }
+
+    // Modal Events
+    if (cartBtn) cartBtn.onclick = () => cartModal.style.display = "block";
+    if (closeBtn) closeBtn.onclick = () => cartModal.style.display = "none";
+    window.onclick = (event) => {
+        if (event.target == cartModal) {
+            cartModal.style.display = "none";
+        }
+    }
+
     async function loadProducts() {
         const container = document.getElementById('productsContainer');
         
@@ -124,6 +224,9 @@
                         <button class="buy-btn">Ajouter au panier</button>
                     </div>
                 `;
+                
+                card.querySelector('.buy-btn').addEventListener('click', () => addToCart(product));
+                
                 container.appendChild(card);
             });
 
