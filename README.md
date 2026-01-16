@@ -1,5 +1,9 @@
 # Maintenance_exercice
 
+### Alluin Edouard, Behani Julien
+
+### groupe 2
+
 **L'objectif de ce tp est de réaliser un site web avec un bug volontaire. Un bînome devra comprendre le fonctionnement du site, chercher le bug et repérer les failles de sécurité. Nous devrons faire deux même avec le projet du bînome.**
 
 ## Conception de notre site
@@ -13,6 +17,7 @@ Nous avons conçue premièrment un front en HTML-CSS pour obtenir un premier ren
 
 ![alt text](image.png)
 ![alt text](<Capture d'écran 2026-01-15 151013.png>)
+![alt text](image-1.png)
 
 ## Développement du bug volontaire
 
