@@ -1,6 +1,7 @@
 # Maintenance_exercice
 
 ### Alluin Edouard, Behani Julien
+### Group: 2
 
 ## Installation
 
