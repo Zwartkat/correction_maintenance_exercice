@@ -102,6 +102,7 @@
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const usernameInput = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
         const errorMsg = document.getElementById('errorMsg');
         // Determine if the action is registration or login based on the button clicked
         const isRegister = e.submitter.id === 'register';
@@ -112,10 +113,10 @@
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: usernameInput })
+                body: JSON.stringify({ username: usernameInput, password : password})
             });
             const data = await response.json();
-            
+
             if (response.ok) {
                 // If successful, store username and redirect to homepage
                 const username = (data.user && data.user.username) ? data.user.username : usernameInput;

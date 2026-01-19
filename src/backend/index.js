@@ -2,6 +2,7 @@ import express from "express";
 import { join } from "path";
 import mysql from "mysql2/promise";
 import jwt from "jsonwebtoken";
+import { hash, compare} from "bcrypt";
 
 const app = express();
 app.use(express.json());
@@ -54,16 +55,16 @@ app.get("/api/users", authenticate, async (req, res) => {
 app.post("/api/users/login", async (req, res) => {
   try {
     
-    const { username } = req.body;
+    const { username, password } = req.body;
    
     const [rows] = await pool.query("SELECT * FROM users WHERE username = ?", [
       username,
     ]);
-    if (rows.length === 0)
-      return res.status(404).json({ message: "User not found" }); 
+    if (rows.length === 0 || !(await compare(password, rows[0].password)))
+      return res.status(404).json({ message: "Invalid credentials" });
     // Generate JWT token
     const token = jwt.sign(
-      { userId: rows[0].id, role: rows[0].email },
+      { userId: rows[0].id },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
@@ -76,7 +77,7 @@ app.post("/api/users/login", async (req, res) => {
 // Create new user if doesn't exist
 app.post("/api/users/register", async (req, res) => {
   try {
-    const { username } = req.body;
+    const { username, password } = req.body;
     const [rows_check] = await pool.query(
       "SELECT * FROM users WHERE username = ?",
       [username],
@@ -84,16 +85,18 @@ app.post("/api/users/register", async (req, res) => {
     if (rows_check.length > 0)
       return res.status(409).json({ message: "User already exists" });
 
-    // Generate a dummy email since it is required by the DB schema but not provided by the form
-    const email = `${username}@example.com`;
+    const hashedPassword = await hash(password, 10);
+
+    console.log("t",username,password)
     const [result] = await pool.query(
-      "INSERT INTO users (username, email) VALUES (?, ?)",
-      [username, email],
+      "INSERT INTO users (username, password) VALUES (?, ?)",
+      [username, hashedPassword],
     );
 
-    res.status(201).json({ user: { id: result.insertId, username, email } });
+    res.status(201).json({ user: { id: result.insertId, username} });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log(error)
+    res.status(500).json({ error: error});
   }
 });
 
@@ -111,15 +114,15 @@ app.get("/api/users/:id", async (req, res) => {
   }
 });
 
-// Insert user with emails
+// Insert user 
 app.post("/api/users", authenticate, async (req, res) => {
   try {
-    const { username, email } = req.body;
+    const { username} = req.body;
     const [result] = await pool.query(
-      "INSERT INTO users (username, email) VALUES (?, ?)",
-      [username, email],
+      "INSERT INTO users (username) VALUES (?, ?)",
+      [username],
     );
-    res.status(201).json({ id: result.insertId, username, email });
+    res.status(201).json({ id: result.insertId, username });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -128,14 +131,14 @@ app.post("/api/users", authenticate, async (req, res) => {
 // Modify user
 app.put("/api/users/:id", authenticate, async (req, res) => {
   try {
-    const { username, email } = req.body;
+    const { username} = req.body;
     const [result] = await pool.query(
-      "UPDATE users SET username = ?, email = ? WHERE id = ?",
-      [username, email, req.params.id],
+      "UPDATE users SET username = ? WHERE id = ?",
+      [username, req.params.id],
     );
     if (result.affectedRows === 0)
       return res.status(404).json({ error: "User not found" });
-    res.json({ id: req.params.id, username, email });
+    res.json({ id: req.params.id, username });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -157,7 +160,7 @@ app.delete("/api/users/:id", authenticate, async (req, res) => {
 
 // --- Products CRUD ---
 // Get products
-app.get("/api/products", authenticate, async (req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM products");
     res.json(rows);
