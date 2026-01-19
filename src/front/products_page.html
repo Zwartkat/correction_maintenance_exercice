@@ -157,7 +157,7 @@
             let total = 0;
             cart.forEach((item, index) => {
                 // Calculate total price
-                total = total * parseFloat(item.price);
+                total += parseFloat(item.price);
                 const div = document.createElement('div');
                 div.className = 'cart-item';
                 div.innerHTML = `
@@ -183,14 +183,20 @@
         updateCartUI();
     }
 
-    function addToCart(product) {
+    function addToCart(product, quantity) {
         if (!username) {
             alert("Veuillez vous connecter pour accéder au panier.");
             window.location.href = 'connection_page.html';
             return;
         }
-        cart.push(product);
-        updateCartUI();
+        if (quantity < 1) {
+            quantity = 1;
+        }
+        
+        for (let i = 0; i < quantity; i++) {
+            cart.push(product);
+            updateCartUI();
+        }
         alert(product.name + " ajouté au panier !");
     }
 
@@ -224,11 +230,14 @@
                     <div class="card-body">
                         <div class="product-name">${product.name}</div>
                         <div class="product-price">${product.price} €</div>
-                        <button class="buy-btn">Ajouter au panier</button>
+                        <div class="container-btns" style="margin-top: auto; display: flex; gap: 10px;">
+                            <button class="buy-btn">Ajouter au panier</button>
+                            <input class="quantity-btn" type="number" min="1" value="1" style="width: 40px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; text-align: center;">
+                        </div>
                     </div>
                 `;
                 
-                card.querySelector('.buy-btn').addEventListener('click', () => addToCart(product));
+                card.querySelector('.buy-btn').addEventListener('click', () => addToCart(product, parseInt(card.querySelector('.quantity-btn').value) || 1));
                 
                 container.appendChild(card);
             });
