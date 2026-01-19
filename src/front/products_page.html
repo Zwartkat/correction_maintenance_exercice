@@ -157,7 +157,8 @@
             let total = 0;
             cart.forEach((item, index) => {
                 // Calculate total price
-                total = total * parseFloat(item.price);
+                console.log(item.price)
+                total += parseFloat(item.price);
                 const div = document.createElement('div');
                 div.className = 'cart-item';
                 div.innerHTML = `
@@ -169,6 +170,7 @@
                 `;
                 cartItemsDiv.appendChild(div);
             });
+            console.log(total);
             cartTotalSpan.textContent = total.toFixed(2);
         }
         
