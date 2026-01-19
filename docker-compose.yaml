@@ -17,6 +17,7 @@ services:
       DB_USER: app_user
       DB_PASSWORD: app_password
       DB_NAME: app_database
+      JWT_SECRET: "kKNhG67ng34"
     networks:
       - internal
 

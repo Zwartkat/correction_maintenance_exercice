@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -13,10 +14,10 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- Insert some sample data
-INSERT INTO users (username, email) VALUES
-('alice', 'alice@example.com'),
-('bob', 'bob@example.com'),
-('charlie', 'charlie@example.com');
+INSERT INTO users (username, email, password) VALUES
+('alice', 'alice@example.com', 'password123'),
+('bob', 'bob@example.com', 'password456'),
+('charlie', 'charlie@example.com', 'password789');
 
 INSERT INTO products (name, price) VALUES
 ('Laptop', 1200.00),

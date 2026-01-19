@@ -114,11 +114,12 @@
                 body: JSON.stringify({ username: usernameInput })
             });
             const data = await response.json();
-
+            
             if (response.ok) {
                 // If successful, store username and redirect to homepage
                 const username = (data.user && data.user.username) ? data.user.username : usernameInput;
                 localStorage.setItem('username', username);
+                localStorage.setItem('token', data.token);
                 window.location.href = 'index.html';
             } else {
                 errorMsg.textContent = data.message || "Erreur de connexion";
