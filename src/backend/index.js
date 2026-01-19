@@ -68,7 +68,7 @@ app.post("/api/users/login", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
-    res.json({ user: rows[0], token });
+    res.json({ user: rows[0].id, token });
   } catch (error) {
     res.status(500).json({ error: error.message, });
   }
@@ -101,7 +101,7 @@ app.post("/api/users/register", async (req, res) => {
 });
 
 // Get user by id
-app.get("/api/users/:id", async (req, res) => {
+app.get("/api/users/:id", authenticate, async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [
       req.params.id,
